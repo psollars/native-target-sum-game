@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import Game from './src/components/Game';
+import Main from './src/components/Main';
 
 export default class App extends Component {
   render() {
     return (
-      <Game />
+      <Main />
     );
   }
 }
