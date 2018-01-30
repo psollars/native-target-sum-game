@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { StyleSheet, Dimensions, Text, View } from 'react-native';
 
+import GuessButton from './GuessButton';
+
 export default class Game extends React.Component {
   render() {
     return (
@@ -9,7 +11,7 @@ export default class Game extends React.Component {
         <Text style={styles.target}>{this.target}</Text>
         <View style={styles.numberContainer}>
           {this.randomNumbers.map((randomNumber, index) => 
-            (<Text style={styles.number} key={index}>{randomNumber}</Text>)
+            (<GuessButton key={index} number={randomNumber} />)
           )}
         </View>
       </View>
@@ -49,14 +51,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  number: {
-    padding: 10,
-    margin: 5,
-    textAlign: 'center',
-    width: (Dimensions.get('window').width/2)-15,
-    backgroundColor: '#fff',
-    fontSize: 22
+    justifyContent: 'center'
   }
 });
