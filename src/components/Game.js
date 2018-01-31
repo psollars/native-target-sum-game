@@ -5,13 +5,26 @@ import { StyleSheet, Dimensions, Text, View } from 'react-native';
 import GuessButton from './GuessButton';
 
 export default class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedIds: []
+    };
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.target}>{this.target}</Text>
         <View style={styles.numberContainer}>
           {this.randomNumbers.map((randomNumber, index) => 
-            (<GuessButton key={index} number={randomNumber} />)
+            (<GuessButton 
+              key={index}
+              id={index} 
+              number={randomNumber}
+              handleSelect={this.selectNumber} 
+              isSelected={this.isNumberSelected(index)}
+            />)
           )}
         </View>
       </View>
@@ -29,6 +42,16 @@ export default class Game extends React.Component {
   target = this.randomNumbers
     .slice(0, this.props.guessButtonCount - 2)
     .reduce((accumulator, currentElement) => accumulator + currentElement, 0);
+
+  selectNumber = (numberIndex) => {
+    this.setState((prevState) => ({
+      selectedIds: [...prevState.selectedIds, numberIndex] 
+    }));
+  };
+
+  isNumberSelected = (numberIndex) => {
+    return this.state.selectedIds.indexOf(numberIndex) !== -1;
+  };
 
 } // end of component
 

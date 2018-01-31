@@ -6,17 +6,23 @@ export default class GuessButton extends React.Component {
   render() {
     return (
       <TouchableOpacity onPress={this.handlePress}>
-        <Text style={styles.number}>{this.props.number}</Text>
+        <Text style={[ styles.number, this.props.isSelected ? styles.selected : null ]}>{this.props.number}</Text>
       </TouchableOpacity>
     );
   }
 
   static propTypes = {
-    number: PropTypes.number.isRequired
+    id: PropTypes.number.isRequired,
+    number: PropTypes.number.isRequired,
+    handleSelect: PropTypes.func.isRequired,
+    isSelected: PropTypes.bool.isRequired
   };
 
   handlePress = () => {
-    console.log(this.props.number);
+    if (!this.props.isSelected) {
+      this.props.handleSelect(this.props.id);
+      console.log(this.props.id);
+    }
   }
 
 } // end of component
@@ -30,5 +36,8 @@ const styles = StyleSheet.create({
     width: (Dimensions.get('window').width/2)-15,
     backgroundColor: '#fff',
     fontSize: 22
+  },
+  selected: {
+    opacity: 0.3
   }
 });
