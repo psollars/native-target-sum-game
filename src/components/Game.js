@@ -9,15 +9,39 @@ export default class Game extends React.Component {
     super(props);
     this.state = {
       selectedIds: [],
-      counter: 10
+      counter: this.props.initialCounter
     };
   }
 
+  componentDidMount = () => {
+    this.intervalId = setInterval(() => {
+      this.setState((prevState) => {
+        return { counter: prevState.counter -= 1};
+      }, () => {
+        if (this.state.counter === 0) {
+          clearInterval(this.intervalId);
+        }
+      });
+    }, 1000);
+  };
+
+  componentWillUpdate = (nextProps, nextState) => {
+    if (nextState.selectedIds !== this.state.selectedIds || nextState.counter === 0) {
+      this.gameStatus = this.determineGameStatus(nextState);
+      if (this.gameStatus !== 'PLAYING') {
+        clearInterval(this.intervalId);
+      }
+    } 
+  };
+
+  componentWillUnmount = () => {
+    clearInterval(this.intervalId);
+  };
+
   render() {
-    const gameStatus = this.determineGameStatus();
     return (
       <View style={styles.container}>
-        <Text style={ [styles.target, styles[`STATUS_${gameStatus}`]] }>{this.target}</Text>
+        <Text style={ [styles.target, styles[`STATUS_${this.gameStatus}`]] }>{this.target}</Text>
         <View style={styles.numberContainer}>
           {this.randomNumbers.map((randomNumber, index) => 
             (<GuessButton 
@@ -25,32 +49,44 @@ export default class Game extends React.Component {
               id={index} 
               number={randomNumber}
               handleSelect={this.selectNumber} 
-              isSelected={this.isNumberSelected(index) || gameStatus !== 'PLAYING'}
+              isSelected={this.isNumberSelected(index) || this.gameStatus !== 'PLAYING'}
             />)
           )}
         </View>
         <View>
-          <Text>{gameStatus !== 'PLAYING' && `You added to: ${this.sumOfSelected()}`}</Text>
-          <Text>{gameStatus !== 'PLAYING' && gameStatus === 'WON' && `:)` }</Text>
-          <Text>{gameStatus !== 'PLAYING' && gameStatus === 'LOST' && `:(` }</Text>
+          <Text>{this.gameStatus !== 'PLAYING' && this.gameStatus === 'WON' && `:)` }</Text>
+          <Text>{this.gameStatus !== 'PLAYING' && this.gameStatus === 'LOST' && `:(` }</Text>
+        </View>
+        <View>
+          <Text>{this.state.counter}</Text>
+          <Text>{this.gameStatus}</Text>
         </View>
       </View>
     );
   }
 
   static propTypes = {
-    guessButtonCount: PropTypes.number.isRequired
+    guessButtonCount: PropTypes.number.isRequired,
+    initialCounter: PropTypes.number.isRequired
   };
 
-  determineGameStatus = () => {
-    if (this.sumOfSelected() < this.target) {
+  gameStatus = 'PLAYING';
+
+  determineGameStatus = (nextState) => {
+    const sumOfSelected = nextState.selectedIds
+      .reduce((accumulator, currentElement) => {
+        return accumulator + this.randomNumbers[currentElement]
+      }, 0);
+    if (nextState.counter === 0) {
+      return 'LOST';
+    } else if (sumOfSelected < this.target) {
       return 'PLAYING';
-    } else if (this.sumOfSelected() === this.target) {
+    } else if (sumOfSelected === this.target) {
       return 'WON';
-    } else if (this.sumOfSelected() > this.target) {
+    } else if (sumOfSelected > this.target) {
       return 'LOST';
     }
-  }
+  };
 
   randomNumbers = Array
     .from({ length: this.props.guessButtonCount })
@@ -70,12 +106,9 @@ export default class Game extends React.Component {
     return this.state.selectedIds.indexOf(numberIndex) !== -1;
   };
 
-  sumOfSelected = () => {
-    return this.state.selectedIds
-      .reduce((accumulator, currentElement) => {
-        return accumulator + this.randomNumbers[currentElement]
-      }, 0);
-  };
+  // sumOfSelected = (nextState) => {
+  //   return 
+  // };
 
 } // end of component
 
