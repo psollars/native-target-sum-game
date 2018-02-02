@@ -8,14 +8,16 @@ export default class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedIds: []
+      selectedIds: [],
+      counter: 10
     };
   }
 
   render() {
+    const gameStatus = this.determineGameStatus();
     return (
       <View style={styles.container}>
-        <Text style={styles.target}>{this.target}</Text>
+        <Text style={ [styles.target, styles[`STATUS_${gameStatus}`]] }>{this.target}</Text>
         <View style={styles.numberContainer}>
           {this.randomNumbers.map((randomNumber, index) => 
             (<GuessButton 
@@ -23,9 +25,14 @@ export default class Game extends React.Component {
               id={index} 
               number={randomNumber}
               handleSelect={this.selectNumber} 
-              isSelected={this.isNumberSelected(index)}
+              isSelected={this.isNumberSelected(index) || gameStatus !== 'PLAYING'}
             />)
           )}
+        </View>
+        <View>
+          <Text>{gameStatus !== 'PLAYING' && `You added to: ${this.sumOfSelected()}`}</Text>
+          <Text>{gameStatus !== 'PLAYING' && gameStatus === 'WON' && `:)` }</Text>
+          <Text>{gameStatus !== 'PLAYING' && gameStatus === 'LOST' && `:(` }</Text>
         </View>
       </View>
     );
@@ -34,6 +41,16 @@ export default class Game extends React.Component {
   static propTypes = {
     guessButtonCount: PropTypes.number.isRequired
   };
+
+  determineGameStatus = () => {
+    if (this.sumOfSelected() < this.target) {
+      return 'PLAYING';
+    } else if (this.sumOfSelected() === this.target) {
+      return 'WON';
+    } else if (this.sumOfSelected() > this.target) {
+      return 'LOST';
+    }
+  }
 
   randomNumbers = Array
     .from({ length: this.props.guessButtonCount })
@@ -53,6 +70,13 @@ export default class Game extends React.Component {
     return this.state.selectedIds.indexOf(numberIndex) !== -1;
   };
 
+  sumOfSelected = () => {
+    return this.state.selectedIds
+      .reduce((accumulator, currentElement) => {
+        return accumulator + this.randomNumbers[currentElement]
+      }, 0);
+  };
+
 } // end of component
 
 const styles = StyleSheet.create({
@@ -67,13 +91,21 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 10,
     fontSize: 40,
-    textAlign: 'center',
-    backgroundColor: '#ff22ff'
+    textAlign: 'center'
   },
   numberContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  STATUS_PLAYING: {
+    backgroundColor: '#bfdaef'
+  },
+  STATUS_WON: {
+    backgroundColor: '#70d891'
+  },
+  STATUS_LOST: {
+    backgroundColor: '#dd6a35'
+  },
 });

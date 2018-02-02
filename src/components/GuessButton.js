@@ -21,7 +21,6 @@ export default class GuessButton extends React.Component {
   handlePress = () => {
     if (!this.props.isSelected) {
       this.props.handleSelect(this.props.id);
-      console.log(this.props.id);
     }
   }
 
